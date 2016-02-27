@@ -1,7 +1,7 @@
 import math
 
 
-def center_target(r, x, y, x_max, y_max, h_fov, v_fov):
+def center_target(r, x, y, h_fov, v_fov):
     # r refers to the distance from the camera to the fire
     # x and y refer to the image coordinates of the fire centroid
     # x_max and y_max refer to the dimensions of the image
@@ -9,6 +9,9 @@ def center_target(r, x, y, x_max, y_max, h_fov, v_fov):
 
     # This function assumes that the image origin is at the top left of the image
     # and that x increases going down, and y increases going to the right
+
+    x_max  = 640
+    y_max = 480
 
     x_offset = float(x_max) / 2.0 - x
     y_offset = float(y_max) / 2.0 - y

@@ -24,10 +24,11 @@ def rotate_motor(motor, angle):
         exit()
     
     duty_cycle = angle * 13 / math.pi
-    print 'the duty cycle is ' + str(duty_cycle)
+    print 'the duty cycle is ' + str(duty_cycle) + '%'
 
     p = GPIO.PWM(channel, 50)
     p.start(angle * 13 / math.pi)
     time.sleep(1)
     p.stop()
-    
+
+    return angle
