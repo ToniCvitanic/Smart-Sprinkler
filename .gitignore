@@ -63,3 +63,6 @@ target/
 
 #xml files
 *.xml
+
+#pictures
+*.png
