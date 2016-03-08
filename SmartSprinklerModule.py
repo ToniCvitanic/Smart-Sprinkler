@@ -103,7 +103,7 @@ def rotate_motor(direction, angle):
     return angle
 
 
-def center_target(pan_angle, tilt_angle, initial_rotation=.9):
+def center_target(pan_angle, tilt_angle, initial_rotation=.09):
     # This function commands the motors to adjust the camera until the centroid of the fire is brought to the center of
     # the image
     # pan_angle and tilt_angle indicate the current pan and tilt angles of the camera
@@ -195,3 +195,19 @@ def center_target(pan_angle, tilt_angle, initial_rotation=.9):
         y_offset = new_y_offset
 
     return 1
+
+
+def spray_water(duration=5):
+    # This function sprays the water fun at full power for a specified amount of time in seconds
+
+    if duration < 0:
+        print 'Cannot spray water for a negative amount time'
+        exit()
+
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.OUT)
+    GPIO.output(27, 1)
+    time.sleep(duration)
+    GPIO.output(27, 0)
+
+    return
