@@ -14,7 +14,7 @@ def capture_image(ramp_frames=10, average_frames=10, file_name='null'):
     #       - camera_capture is the averaged  image variable
     
     # Initialize the camera capture object with cv2.VideoCapture
-    camera = cv2.VideoCapture(0)    # Default camera port is 0
+    camera = cv2.VideoCapture(0)   # Default camera port is 0
 
     # Function to capture a single image from the camera and return it as a .pil
     def get_image():
