@@ -52,6 +52,7 @@ def capture_image(ramp_frames=10, average_frames=10, file_name='null'):
 
 
 def find_centroid(img, level=240):
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img, level, 255, 0)
     if thresh.max() < 255:
         FLAME_DETECTED = 0
