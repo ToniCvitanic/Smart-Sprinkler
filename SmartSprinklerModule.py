@@ -6,6 +6,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 
+# showing git functionality
+
 # Capture an Image Directly from the Webcam:
 
 
