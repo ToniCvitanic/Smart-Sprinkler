@@ -18,7 +18,7 @@ while 1:
                 image = SSM.capture_image()
                 flame_present = SSM.find_centroid(image)
                 if flame_present:
-                    tilt_angle = SSM.rotate_motor('tilt',tilt_angle + math.pi / 6)
+                    tilt_angle = SSM.rotate_motor('tilt', tilt_angle + math.pi / 6)
         else:
             print 'Failed to center target. Need to adjust the gains in the center_target function.'
             exit()
