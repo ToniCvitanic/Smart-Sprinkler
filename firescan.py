@@ -10,7 +10,7 @@ while 1:
     flame_present, x_centroid, y_centroid = SSM.find_centroid(image)
     if flame_present:
         print 'Flame detected!'
-        target_centered = SSM.center_target(pan_angle, tilt_angle)
+        target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         if target_centered:
             while flame_present:
                 SSM.spray_water()
