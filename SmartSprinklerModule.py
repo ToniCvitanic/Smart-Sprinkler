@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import pigpio
 import time
 import math
 import cv2
@@ -54,7 +55,7 @@ def capture_image(ramp_frames=10, average_frames=10, file_name='null'):
 
 
 def find_centroid(img, level=240):
-    img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img, level, 255, 0)
     if thresh.max() < 255:
         FLAME_DETECTED = 0
@@ -85,14 +86,6 @@ def rotate_motor(direction, angle):
         print 'Reached maximum angle for ' + direction
         angle = math.pi / 2
 
-    GPIO.setmode(GPIO.BCM)
-    if direction == 'pan':
-        GPIO.setup(17, GPIO.OUT)
-        channel = 17
-    else:
-        GPIO.setup(18, GPIO.OUT)
-        channel = 18
-
     if angle <= 0:
         duty_cycle = (math.pi / 2 - abs(angle)) * 5.5 / (math.pi / 2) + 2
     else:
@@ -102,10 +95,10 @@ def rotate_motor(direction, angle):
     else:
         print 'the tilt duty cycle is ' + str(duty_cycle) + '%'
 
-    p = GPIO.PWM(channel, 50)
-    p.start(duty_cycle)
-    time.sleep(1)
-    p.stop()
+    if direction == 'pan':
+        pigpio.hardware_PWM(13, 50, duty_cycle * 10000)
+    else:
+        pigpio.hardware_PWM(18, 50, duty_cycle * 10000)
 
     return angle
 
