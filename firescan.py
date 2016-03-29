@@ -5,16 +5,19 @@ import math
 pan_angle = SSM.rotate_motor('pan', -5)
 tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
 
+i = 1
 while 1:
-    image = SSM.capture_image()
+    image = SSM.capture_image(10,10,'image' + str(i))
     flame_present, x_centroid, y_centroid = SSM.find_centroid(image)
     if flame_present:
         print 'Flame detected!'
         target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         if target_centered:
+            j = 1
             while flame_present:
+                print 'Spraying water'
                 SSM.spray_water()
-                image = SSM.capture_image()
+                image = SSM.capture_image(10,10,'flameimage' + str(j))
                 flame_present = SSM.find_centroid(image)
                 # If initial spray did not extinguish the fire, spray upwards in increments until it has been
                 # extinguished
@@ -22,6 +25,7 @@ while 1:
                     tilt_angle = SSM.rotate_motor('tilt', tilt_angle + math.pi / 6)
                 else:
                     tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
+                j = j+1
         else:
             print 'Failed to center target. Need to adjust the gains in the center_target function.'
             exit()
@@ -31,3 +35,4 @@ while 1:
             pan_angle = SSM.rotate_motor('pan', -5)
         else:
             pan_angle = SSM.rotate_motor('pan', pan_angle + .1745)
+    i = i+1

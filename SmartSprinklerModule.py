@@ -54,7 +54,7 @@ def capture_image(ramp_frames=10, average_frames=10, file_name='null'):
 # Determine the Centroid of an Image
 
 
-def find_centroid(img, level=240):
+def find_centroid(img, level=200):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img, level, 255, 0)
     if thresh.max() < 255:
@@ -65,6 +65,8 @@ def find_centroid(img, level=240):
         FLAME_DETECTED = 1
         contours, hierarchy = cv2.findContours(thresh, 1, 2)
         M = cv2.moments(contours[len(contours)-1])
+        if M['m00'] == 0:
+            M['m00'] = thresh.sum() / 255
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
     return FLAME_DETECTED, cx, cy
@@ -74,6 +76,8 @@ def rotate_motor(direction, angle):
     # This function rotates the desired motor to the specified angle.
     # direction can either be pan or tilt
     # angle is an angle rotation in radians
+
+    pi = pigpio.pi()
 
     if direction is not 'pan' and direction is not 'tilt':
         print 'Please choose either pan or tilt for the direction'
@@ -96,9 +100,9 @@ def rotate_motor(direction, angle):
         print 'the tilt duty cycle is ' + str(duty_cycle) + '%'
 
     if direction == 'pan':
-        pigpio.hardware_PWM(13, 50, duty_cycle * 10000)
+        pi.hardware_PWM(13, 50, duty_cycle * 10000)
     else:
-        pigpio.hardware_PWM(18, 50, duty_cycle * 10000)
+        pi.hardware_PWM(18, 50, duty_cycle * 10000)
 
     return angle
 
