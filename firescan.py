@@ -3,7 +3,7 @@ import math
 
 # Initialize the position of the sprinkler to be at -90 degrees in pan, and -45 degrees in tilt
 pan_angle = SSM.rotate_motor('pan', -5)
-tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
+tilt_angle = SSM.rotate_motor('tilt', -1.1)
 
 i = 1
 while 1:
@@ -34,5 +34,5 @@ while 1:
         if pan_angle > math.pi / 2 - .09:
             pan_angle = SSM.rotate_motor('pan', -5)
         else:
-            pan_angle = SSM.rotate_motor('pan', pan_angle + .1745)
+            pan_angle = SSM.rotate_motor('pan', pan_angle + 30 * math.pi / 180)
     i = i+1

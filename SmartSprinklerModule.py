@@ -54,7 +54,7 @@ def capture_image(ramp_frames=10, average_frames=10, file_name='null'):
 # Determine the Centroid of an Image
 
 
-def find_centroid(img, level=200):
+def find_centroid(img, level=240):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img, level, 255, 0)
     if thresh.max() < 255:
@@ -107,7 +107,7 @@ def rotate_motor(direction, angle):
     return angle
 
 
-def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=.1):
+def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=2*math.pi/180):
     # This function commands the motors to adjust the camera until the centroid of the fire is brought to the center of
     # the image
     # pan_angle and tilt_angle indicate the current pan and tilt angles of the camera
@@ -144,8 +144,8 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=.1):
             tilt_angle = rotate_motor('tilt', tilt_angle + initial_rotation)
         else:
             tilt_angle = rotate_motor('tilt', tilt_angle - initial_rotation)
-
-    img = capture_image()
+    i = 1
+    img = capture_image(10,10,'centerimage' + str(i))
     flame, cx, cy = find_centroid(img)
     if not flame:
         print 'Fire no longer detected after small angle change. Either the camera is too close to the fire, or the' \
@@ -163,8 +163,8 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=.1):
         print('The initial turret rotation is too small. Please choose a larger initial rotation.')
         exit()
 
-    x_gain = initial_rotation / abs(x_change)
-    y_gain = initial_rotation / abs(y_change)
+    x_gain = .1 * initial_rotation / abs(x_change)
+    y_gain = .1 * initial_rotation / abs(y_change)
 
     x_offset = new_x_offset
     y_offset = new_y_offset
@@ -175,16 +175,16 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=.1):
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
             if x_offset < 0:
-                rotate_motor('pan', pan_angle - abs(x_offset) * .1 * x_gain)
+                rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
             else:
-                rotate_motor('pan', pan_angle + x_offset * .1 * x_gain)
+                rotate_motor('pan', pan_angle + x_offset * x_gain)
         if abs(y_offset) > tolerance:
             if y_offset < 0:
                 rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
             else:
                 rotate_motor('tilt', tilt_angle - y_offset * y_gain)
-
-        img = capture_image()
+        i = i + 1
+        img = capture_image(10,10,'centerimage' + str(i))
         flame, cx, cy = find_centroid(img)
         if not flame:
             print 'Flame lost'
@@ -200,8 +200,8 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=.1):
             print 'The gain is too small. Consider adding higher proportional or integral gains'
             exit()
 
-        x_gain = abs(x_offset * x_gain) / abs(x_change)
-        y_gain = abs(y_offset * y_gain) / abs(y_change)
+        x_gain = .1 * abs(x_offset * x_gain) / abs(x_change)
+        y_gain = .1 * abs(y_offset * y_gain) / abs(y_change)
 
         x_offset = new_x_offset
         y_offset = new_y_offset
