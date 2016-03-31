@@ -64,12 +64,32 @@ def find_centroid(img, level=240):
     else:
         FLAME_DETECTED = 1
         contours, hierarchy = cv2.findContours(thresh, 1, 2)
-        M = cv2.moments(contours[len(contours)-1])
+        cnt = contours[len(contours)-1]
+        
+        M = cv2.moments(cnt)
         if M['m00'] == 0:
-            M['m00'] = thresh.sum() / 255
+            M['m00'] = thresh.sum()/255
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
-    return FLAME_DETECTED, cx, cy
+
+        cntx = cnt[:,0,0]
+        cnty = cnt[:,0,1]
+
+        EDGE_CROSSING = 0
+        if len(cntx[cntx <= 10]) > 5:
+            EDGE_CROSSING = 1
+            print 'Flame crosses Left Side of Image'
+        if len(cntx[cntx >=630]) > 5:
+            EDGE_CROSSING = 1
+            print 'Flame crosses Right Side of Image'
+        if len(cnty[cnty <= 10]) > 5:
+            EDGE_CROSSING = 1
+            print 'Flame crosses Top Side of Image'
+        if len(cntx[cntx >= 470]) > 5:
+            EDGE_CROSSING = 1
+            print 'Flame crosses Bottom Side of Image'
+        
+    return FLAME_DETECTED, cx, cy, EDGE_CROSSING
 
 
 def rotate_motor(direction, angle):

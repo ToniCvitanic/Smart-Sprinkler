@@ -1,31 +1,30 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import pylab
-import SmartSprinklerModule as ssm
-import math
+import matplotlib.pyplot as plt
 
-def Pix2PT(x,y,Po,To):
-    # Calculate approximate pan and tilt to center on pixel (x,y), where (0,0)
-    # is the upper right corner of the image.
+#im = cv2.imread('farflame.png')
+#im = cv2.imread('closeflame.png')
+#im = cv2.imread('testing.png')
+im = cv2.imread('edgypic.png')
 
-    # Hardcoded camera specs:
-    fov = 25*math.pi/180
-    w = 640
-    h = 480
+imgray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+ret, thresh = cv2.threshold(imgray,240,255,0)
+contours,hierarchy = cv2.findContours(thresh,1,2)
 
-    d = 0.5*math.sqrt(w*w+h*h)/math.tan(fov/2)
-    t = w/2-x
+cnt = contours[len(contours)-1]
+cntx = cnt[:,0,0]
+cnty = cnt[:,0,1]
 
-    P = Po + math.atan(t/d)*180/math.pi
-    T = To + math.atan((h/2-y)/math.sqrt(d*d+t*t))*180/math.pi
+print cntx[cntx<=15]
+print cntx[cntx>=625]
+print cnty[cnty<=15]
+print cnty[cnty>=465]
 
-    return P,T
 
-print Pix2PT(0,240,0,0)
-print Pix2PT(640,240,0,0)
-print Pix2PT(320,0,0,0)
-print Pix2PT(320,480,0,0)
+
+imgplot = plt.imshow(im,cmap='gray')
+cv2.drawContours(im,contours,-1,(0,255,0),3)
+plt.show()
 
 #img = cv2.imread('farflame.png',0)
 #img = ssm.capture_image()
