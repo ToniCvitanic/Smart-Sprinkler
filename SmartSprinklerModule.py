@@ -61,6 +61,7 @@ def find_centroid(img, level=240):
         FLAME_DETECTED = 0
         cx = []
         cy = []
+        EDGE_CROSSING = 0
     else:
         FLAME_DETECTED = 1
         contours, hierarchy = cv2.findContours(thresh, 1, 2)
@@ -80,13 +81,13 @@ def find_centroid(img, level=240):
             EDGE_CROSSING = 1
             print 'Flame crosses Left Side of Image'
         if len(cntx[cntx >=630]) > 5:
-            EDGE_CROSSING = 1
+            EDGE_CROSSING = 2
             print 'Flame crosses Right Side of Image'
         if len(cnty[cnty <= 10]) > 5:
-            EDGE_CROSSING = 1
+            EDGE_CROSSING = 3
             print 'Flame crosses Top Side of Image'
         if len(cntx[cntx >= 470]) > 5:
-            EDGE_CROSSING = 1
+            EDGE_CROSSING = 4
             print 'Flame crosses Bottom Side of Image'
         
     return FLAME_DETECTED, cx, cy, EDGE_CROSSING
