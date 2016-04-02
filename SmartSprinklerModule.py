@@ -137,8 +137,8 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=2*math.pi/180)
     # The function returns 1 if successful, and 0 if unsuccessful
 
     # Define the image size
-    x_max = 480
-    y_max = 640
+    x_max = 640
+    y_max = 480
 
     # Capture an initial image
     #img = capture_image()
