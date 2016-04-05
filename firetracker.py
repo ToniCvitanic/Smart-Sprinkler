@@ -3,7 +3,7 @@ import math
 
 # Initialize the position of the sprinkler to be at -90 degrees in pan, and -45 degrees in tilt
 pan_angle = SSM.rotate_motor('pan', -1.3)
-tilt_angle = SSM.rotate_motor('tilt', -1.1)
+tilt_angle = SSM.rotate_motor('tilt', -.8)
 
 i = 1
 while 1:
@@ -30,7 +30,7 @@ while 1:
         else:
             print 'Failed to center target'
             pan_angle = SSM.rotate_motor('pan', -1.3)
-            tilt_angle = SSM.rotate_motor('tilt', -1.1)
+            tilt_angle = SSM.rotate_motor('tilt', -.8)
     else:
         # If the camera has panned across the whole 180 degrees, return to the beginning angle and start over
         if pan_angle > math.pi / 2 - .09:
