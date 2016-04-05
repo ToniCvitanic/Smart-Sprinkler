@@ -76,20 +76,20 @@ def find_centroid(img, level=240):
         cntx = cnt[:,0,0]
         cnty = cnt[:,0,1]
 
-        EDGE_CROSSING = 0
+        EDGE_CROSSING = []
         if len(cntx[cntx <= 10]) > 5:
-            EDGE_CROSSING = 1
+            EDGE_CROSSING.append(1)
             print 'Flame crosses Left Side of Image'
         if len(cntx[cntx >=630]) > 5:
-            EDGE_CROSSING = 2
+            EDGE_CROSSING.append(2)
             print 'Flame crosses Right Side of Image'
         if len(cnty[cnty <= 10]) > 5:
-            EDGE_CROSSING = 3
+            EDGE_CROSSING.append(3)
             print 'Flame crosses Top Side of Image'
-        if len(cntx[cntx >= 470]) > 5:
-            EDGE_CROSSING = 4
+        if len(cnty[cnty >= 470]) > 5:
+            EDGE_CROSSING.append(4)
             print 'Flame crosses Bottom Side of Image'
-        
+            
     return FLAME_DETECTED, cx, cy, EDGE_CROSSING
 
 
