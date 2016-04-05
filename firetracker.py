@@ -3,7 +3,7 @@ import math
 
 # Initialize the position of the sprinkler to be at -90 degrees in pan, and -45 degrees in tilt
 pan_angle = SSM.rotate_motor('pan', -1.3)
-tilt_angle = SSM.rotate_motor('tilt', -.8)
+tilt_angle = SSM.rotate_motor('tilt', -1.5)
 
 i = 1
 while 1:
@@ -12,16 +12,16 @@ while 1:
     if flame_present:
         print 'Flame detected!'
         if edge_crossing == 1:
-            pan_angle = ssm.rotate_motor('pan', pan_angle - 5 * math.pi / 180)
+            pan_angle = SSM.rotate_motor('pan', pan_angle - 5 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         elif edge_crossing == 2:
-            pan_angle = ssm.rotate_motor('pan', pan_angle + 5 * math.pi / 180)
+            pan_angle = SSM.rotate_motor('pan', pan_angle + 5 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         elif edge_crossing == 3:
-            tilt_angle = ssm.rotate_motor('tilt', tilt_angle - 5 * math.pi / 180)
+            tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 5 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         elif edge_crossing == 4:
-            tilt_angle = ssm.rotate_motor('tilt', tilt_angle + 5 * math.pi / 180)
+            tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 5 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         else:
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
