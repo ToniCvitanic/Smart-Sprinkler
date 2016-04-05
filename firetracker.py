@@ -11,21 +11,20 @@ while 1:
     flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
     if flame_present:
         print 'Flame detected!'
-        target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        #if edge_crossing == 1:
-            #ssm.rotate_motor('pan', 10 * math.pi / 180)
-            #target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        #elif edge_crossing == 2:
-            #ssm.rotate_motor('pan', -10 * math.pi / 180)
-            #target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        #elif edge_crossing == 3:
-            #ssm.rotate_motor('tilt', -10 * math.pi / 180)
-            #target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        #elif edge_crossing == 4:
-            #ssm.rotate_motor('tilt', 10 * math.pi / 180)
-            #target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        #else:
-            #target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+        if edge_crossing == 1:
+            pan_angle = ssm.rotate_motor('pan', pan_angle - 5 * math.pi / 180)
+            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+        elif edge_crossing == 2:
+            pan_angle = ssm.rotate_motor('pan', pan_angle + 5 * math.pi / 180)
+            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+        elif edge_crossing == 3:
+            tilt_angle = ssm.rotate_motor('tilt', tilt_angle - 5 * math.pi / 180)
+            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+        elif edge_crossing == 4:
+            tilt_angle = ssm.rotate_motor('tilt', tilt_angle + 5 * math.pi / 180)
+            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+        else:
+            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         if target_centered:
             print 'target is centered'
         else:
