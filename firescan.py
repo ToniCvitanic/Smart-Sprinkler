@@ -12,16 +12,16 @@ while 1:
     if flame_present:
         print 'Flame detected!'
         if edge_crossing == 1:
-            pan_angle = SSM.rotate_motor('pan', pan_angle - 5 * math.pi / 180)
+            pan_angle = SSM.rotate_motor('pan', pan_angle - 3 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         elif edge_crossing == 2:
-            pan_angle = SSM.rotate_motor('pan', pan_angle + 5 * math.pi / 180)
+            pan_angle = SSM.rotate_motor('pan', pan_angle + 3 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         elif edge_crossing == 3:
-            tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 5 * math.pi / 180)
+            tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         elif edge_crossing == 4:
-            tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 5 * math.pi / 180)
+            tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 3 * math.pi / 180)
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
         else:
             target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
@@ -32,13 +32,16 @@ while 1:
                 SSM.spray_water()
                 image = SSM.capture_image(1,1,'flameimage' + str(j))
                 flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
-                # If initial spray did not extinguish the fire, spray upwards in increments until it has been
-                # extinguished
-                #if flame_present:
-                    #tilt_angle = SSM.rotate_motor('tilt', tilt_angle + math.pi / 6)
-                #else:
-                    #tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
-                #j = j+1
+                 #If initial spray did not extinguish the fire, spray upwards in increments until it has been
+                 #extinguished
+                if flame_present:
+                    if y_offset > 0:
+                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
+                    else:
+                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 3 * math.pi / 180)
+                else:
+                    tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
+                j = j+1
         else:
             print 'Failed to center target. Need to adjust the gains in the center_target function.'
             exit()
