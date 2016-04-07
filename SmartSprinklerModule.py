@@ -147,6 +147,9 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
     gain = initial_gain
     mid_gain = .003
     far_gain = .005
+    Ix_gain = 0
+    Iy_gain = 0
+    I_coef = .001
 
     # Calculate how far the x and y coordinates of the centroid are from the center of the image
     x_offset = cx - float(x_max) / 2.0
@@ -167,14 +170,14 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
             if x_offset < 0:
-                rotate_motor('pan', pan_angle - abs(x_offset) * (initial_gain if i <= 2 else gain))
+                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if i > 4 else 0)))
             else:
-                rotate_motor('pan', pan_angle + x_offset * (initial_gain if i <= 2 else gain))
+                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if i > 4 else 0)))
         if abs(y_offset) > tolerance:
             if y_offset < 0:
-                rotate_motor('tilt', tilt_angle - abs(y_offset) * (initial_gain if i <= 2 else gain))
+                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if i > 4 else 0)))
             else:
-                rotate_motor('tilt', tilt_angle + y_offset * (initial_gain if i <= 2 else gain))
+                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if i > 4 else 0)))
         img = capture_image(3, 3, 'centerimage' + str(i))
         flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
@@ -187,6 +190,10 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
         if i <= 2:
             x_change[i] = (new_x_offset - x_offset)
             y_change[i] = (new_y_offset - y_offset)
+
+        if i > 3:
+            Ix_gain = Ix_gain + I_coef * (new_x_offset - x_offset)
+            Iy_gain = Iy_gain + I_coef * (new_y_offset - y_offset)
 
         x_offset = new_x_offset
         y_offset = new_y_offset

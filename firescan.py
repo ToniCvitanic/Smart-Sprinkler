@@ -7,7 +7,7 @@ tilt_angle = SSM.rotate_motor('tilt', -1.1)
 
 i = 1
 while 1:
-    image = SSM.capture_image(10,10,'image' + str(i))
+    image = SSM.capture_image(3,3,'image' + str(i))
     flame_present, x_centroid, y_centroid = SSM.find_centroid(image)
     if flame_present:
         print 'Flame detected!'
