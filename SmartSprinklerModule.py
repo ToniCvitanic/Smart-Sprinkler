@@ -149,7 +149,7 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
     far_gain = .005
     Ix_gain = 0
     Iy_gain = 0
-    I_coef = .001
+    I_coef = .00003
 
     # Calculate how far the x and y coordinates of the centroid are from the center of the image
     x_offset = cx - float(x_max) / 2.0
@@ -191,12 +191,12 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
             x_change[i] = (new_x_offset - x_offset)
             y_change[i] = (new_y_offset - y_offset)
 
-        if i > 3:
-            Ix_gain = Ix_gain + I_coef * (new_x_offset - x_offset)
-            Iy_gain = Iy_gain + I_coef * (new_y_offset - y_offset)
-
         x_offset = new_x_offset
         y_offset = new_y_offset
+
+        if i > 3:
+            Ix_gain = Ix_gain + I_coef * abs(x_offset)
+            Iy_gain = Iy_gain + I_coef * abs(y_offset)
 
         if i == 3:
             ave_x_change = (abs(x_change[0]) + abs(x_change[1]) + abs(x_change[2]))/3
