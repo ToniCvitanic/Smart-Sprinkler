@@ -132,7 +132,7 @@ def rotate_motor(direction, angle):
     return angle
 
 
-def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
+def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     # This function commands the motors to adjust the camera until the centroid of the fire is brought to the center of
     # the image
     # pan_angle and tilt_angle indicate the current pan and tilt angles of the camera
@@ -145,18 +145,21 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
     y_max = 480
 
     gain = initial_gain
-    mid_gain = .003
-    far_gain = .005
+    mid_gain = .001
+    far_gain = .003
     Ix_gain = 0
     Iy_gain = 0
-    I_coef = .00003
+    Ix_coef = .000002
+    Iy_coef = .000005
+    Ix_limit = 200
+    Iy_limit = 200
 
     # Calculate how far the x and y coordinates of the centroid are from the center of the image
     x_offset = cx - float(x_max) / 2.0
     y_offset = cy - float(y_max) / 2.0
 
     # Define a tolerance of how close you want cx and cy to be to the center of the image (in pixels)
-    tolerance = 3
+    tolerance = 30
 
     i = 0
 
@@ -170,15 +173,15 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
             if x_offset < 0:
-                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < 70 > 4 else 0)))
+                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < Ix_limit > 4 else 0)))
             else:
-                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < 70 else 0)))
+                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < Ix_limit else 0)))
         if abs(y_offset) > tolerance:
             if y_offset < 0:
-                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < 70 else 0)))
+                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < Iy_limit else 0)))
             else:
-                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < 70 else 0)))
-        img = capture_image(3, 3, 'centerimage' + str(i))
+                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < Iy_limit else 0)))
+        img = capture_image(1, 1, 'centerimage' + str(i))
         flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
             print 'Flame lost'
@@ -194,10 +197,10 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
         x_offset = new_x_offset
         y_offset = new_y_offset
 
-        if abs(x_offset) < 70:
-            Ix_gain += I_coef * abs(x_offset)
-        if abs(y_offset) < 70:
-            Iy_gain += I_coef * abs(y_offset)
+        if abs(x_offset) < Ix_limit:
+            Ix_gain += Ix_coef * abs(x_offset)
+        if abs(y_offset) < Iy_limit:
+            Iy_gain += Iy_coef * abs(y_offset)
 
         if i == 3:
             ave_x_change = (abs(x_change[0]) + abs(x_change[1]) + abs(x_change[2]))/3
