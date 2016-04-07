@@ -170,14 +170,14 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
             if x_offset < 0:
-                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if i > 4 else 0)))
+                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < 70 > 4 else 0)))
             else:
-                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if i > 4 else 0)))
+                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < 70 else 0)))
         if abs(y_offset) > tolerance:
             if y_offset < 0:
-                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if i > 4 else 0)))
+                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < 70 else 0)))
             else:
-                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if i > 4 else 0)))
+                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < 70 else 0)))
         img = capture_image(3, 3, 'centerimage' + str(i))
         flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
@@ -194,9 +194,10 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.001):
         x_offset = new_x_offset
         y_offset = new_y_offset
 
-        if i > 3:
-            Ix_gain = Ix_gain + I_coef * abs(x_offset)
-            Iy_gain = Iy_gain + I_coef * abs(y_offset)
+        if abs(x_offset) < 70:
+            Ix_gain += I_coef * abs(x_offset)
+        if abs(y_offset) < 70:
+            Iy_gain += I_coef * abs(y_offset)
 
         if i == 3:
             ave_x_change = (abs(x_change[0]) + abs(x_change[1]) + abs(x_change[2]))/3
