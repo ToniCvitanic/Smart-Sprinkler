@@ -35,6 +35,9 @@ for change in changes:
         if abs(To+change)<90:
                 F = 0; cxo = 0; cyo = 0; E=0; cx = 0; cy = 0
                 F,cxo,cyo,E = ssm.find_centroid(ssm.capture_image(3,3))
+                if not(cxo):
+                        cxo = float('inf')
+                        cyo = float('inf')
 
                 ssm.rotate_motor('tilt',(To+change)*3.14159/180)
                 F,cx,cy,E = ssm.find_centroid(ssm.capture_image(3,3))
@@ -47,38 +50,47 @@ for change in changes:
 
                 F = 0; cxo = 0; cyo = 0; E=0; cx = 0; cy = 0
                 F,cxo,cyo,E = ssm.find_centroid(ssm.capture_image(3,3))
+                if not(cxo):
+                        cxo = float('inf')
+                        cyo = float('inf')
 
                 ssm.rotate_motor('tilt',(To)*3.14159/180)
                 F,cx,cy,E = ssm.find_centroid(ssm.capture_image(3,3))
                 if not(E) and F:
-                        ssm.write_csv(R,To,Po,To,Po,cxo,cyo,cx,cy)
+                        ssm.write_csv(R,To+change,Po,To,Po,cxo,cyo,cx,cy)
                 elif not(F):
-                        ssm.write_csv(R,To,Po,To,Po,cxo,cyo,float('inf'),float('inf'))
+                        ssm.write_csv(R,To+change,Po,To,Po,cxo,cyo,float('inf'),float('inf'))
                 elif E:
-                        ssm.write_csv(R,To,Po,To,Po,cxo,cyo,cx,cy,1)
+                        ssm.write_csv(R,To+change,Po,To,Po,cxo,cyo,cx,cy,1)
         if abs(Po+change)<90:
                 F = 0; cxo = 0; cyo = 0; E=0; cx = 0; cy = 0
                 F,cxo,cyo,E = ssm.find_centroid(ssm.capture_image(3,3))
-
+                if not(cxo):
+                        cxo = float('inf')
+                        cyo = float('inf')
+                        
                 ssm.rotate_motor('pan',(Po+change)*3.14159/180)
+                F,cx,cy,E = ssm.find_centroid(ssm.capture_image(3,3))
+                if not(E) and F:
+                        ssm.write_csv(R,To,Po,To,Po+change,cxo,cyo,cx,cy)
+                elif not(F):
+                        ssm.write_csv(R,To,Po,To,Po+change,cxo,cyo,float('inf'),float('inf'))
+                elif E:
+                        ssm.write_csv(R,To,Po,To,Po+change,cxo,cyo,cx,cy,1)
+
+                F = 0; cxo = 0; cyo = 0; E=0; cx = 0; cy = 0
+                F,cxo,cyo,E = ssm.find_centroid(ssm.capture_image(3,3))
+                if not(cxo):
+                        cxo = float('inf')
+                        cyo = float('inf')
+
+                ssm.rotate_motor('pan',(Po)*3.14159/180)
                 F,cx,cy,E = ssm.find_centroid(ssm.capture_image(3,3))
                 if not(E) and F:
                         ssm.write_csv(R,To,Po+change,To,Po,cxo,cyo,cx,cy)
                 elif not(F):
                         ssm.write_csv(R,To,Po+change,To,Po,cxo,cyo,float('inf'),float('inf'))
                 elif E:
-                        ssm.write_csv(R,To,Po+change,To,Po,cxo,cyo,cx,cy,1)
-
-                F = 0; cxo = 0; cyo = 0; E=0; cx = 0; cy = 0
-                F,cxo,cyo,E = ssm.find_centroid(ssm.capture_image(3,3))
-
-                ssm.rotate_motor('pan',(Po)*3.14159/180)
-                F,cx,cy,E = ssm.find_centroid(ssm.capture_image(3,3))
-                if not(E) and F:
-                        ssm.write_csv(R,To,Po,To,Po,cxo,cyo,cx,cy)
-                elif not(F):
-                        ssm.write_csv(R,To,Po,To,Po,cxo,cyo,float('inf'),float('inf'))
-                elif E:
-                        ssm.write_csv(R,To,Po,To,Po,cxo,cyo,cx,cy,1)                        
+                        ssm.write_csv(R,To,Po+change,To,Po,cxo,cyo,cx,cy,1)                        
 
 import killmotors
