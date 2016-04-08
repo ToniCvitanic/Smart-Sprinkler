@@ -3,8 +3,8 @@ import pigpio
 import time
 import math
 import cv2
+import csv
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 
 # Note: camera coordinates: x starts at left side, y starts from top and goes down
@@ -234,3 +234,19 @@ def spray_water(duration=5):
     GPIO.output(27, 0)
 
     return
+
+def write_csv(R,To,Po,Tf,Pf,cxo,cyo,cxf,cyf,E=0):
+        filename = 'test_data.csv'
+        with open(filename,'a') as csvfile:
+                fieldnames = ['R', 'To', 'Po', 'Tf', 'Pf', 'cxo', 'cyo', 'cxf', 'cyf', 'E']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writerow({'R': R, \
+                                 'To': To, \
+                                 'Po': Po, \
+                                 'Tf': Tf, \
+                                 'Pf': Pf, \
+                                 'cxo': cxo, \
+                                 'cyo': cyo, \
+                                 'cxf': cxf, \
+                                 'cyf': cyf, \
+                                 'E': E})
