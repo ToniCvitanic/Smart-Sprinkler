@@ -3,8 +3,8 @@ import pigpio
 import time
 import math
 import cv2
+import csv
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 
 # Note: camera coordinates: x starts at left side, y starts from top and goes down
@@ -76,20 +76,20 @@ def find_centroid(img, level=240):
         cntx = cnt[:,0,0]
         cnty = cnt[:,0,1]
 
-        EDGE_CROSSING = 0
+        EDGE_CROSSING = []
         if len(cntx[cntx <= 10]) > 5:
-            EDGE_CROSSING = 1
+            EDGE_CROSSING.append(1)
             print 'Flame crosses Left Side of Image'
         if len(cntx[cntx >=630]) > 5:
-            EDGE_CROSSING = 2
+            EDGE_CROSSING.append(2)
             print 'Flame crosses Right Side of Image'
         if len(cnty[cnty <= 10]) > 5:
-            EDGE_CROSSING = 3
+            EDGE_CROSSING.append(3)
             print 'Flame crosses Top Side of Image'
-        if len(cntx[cntx >= 470]) > 5:
-            EDGE_CROSSING = 4
+        if len(cnty[cnty >= 470]) > 5:
+            EDGE_CROSSING.append(4)
             print 'Flame crosses Bottom Side of Image'
-        
+            
     return FLAME_DETECTED, cx, cy, EDGE_CROSSING
 
 
@@ -111,13 +111,17 @@ def rotate_motor(direction, angle):
         print 'Reached maximum angle for ' + direction
         angle = math.pi / 2
 
-    if angle <= 0:
-        duty_cycle = (math.pi / 2 - abs(angle)) * 5.5 / (math.pi / 2) + 2
-    else:
-        duty_cycle = angle * (5.5 / (math.pi / 2)) + 7.5
     if direction is 'pan':
+        if angle <= 0:
+            duty_cycle = (math.pi / 2 - abs(angle)) * 4.55 / (math.pi / 2) + 3.4
+        else:
+            duty_cycle = angle * (4.55 / (math.pi / 2)) + 7.95
         print 'the pan duty cycle is ' + str(duty_cycle) + '%'
     else:
+        if angle <= 0:
+            duty_cycle = (math.pi / 2 - abs(angle)) * 4.55 / (math.pi / 2) + 3.4
+        else:
+            duty_cycle = angle * (4.55 / (math.pi / 2)) + 7.95
         print 'the tilt duty cycle is ' + str(duty_cycle) + '%'
 
     if direction == 'pan':
@@ -128,7 +132,7 @@ def rotate_motor(direction, angle):
     return angle
 
 
-def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=2*math.pi/180):
+def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     # This function commands the motors to adjust the camera until the centroid of the fire is brought to the center of
     # the image
     # pan_angle and tilt_angle indicate the current pan and tilt angles of the camera
@@ -137,96 +141,82 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_rotation=2*math.pi/180)
     # The function returns 1 if successful, and 0 if unsuccessful
 
     # Define the image size
-    x_max = 480
-    y_max = 640
+    x_max = 640
+    y_max = 480
 
-    # Capture an initial image
-    #img = capture_image()
-    #flame, cx, cy = find_centroid(img)
+    gain = initial_gain
+    mid_gain = .001
+    far_gain = .003
+    Ix_gain = 0
+    Iy_gain = 0
+    Ix_coef = .000002
+    Iy_coef = .000005
+    Ix_limit = 200
+    Iy_limit = 200
 
     # Calculate how far the x and y coordinates of the centroid are from the center of the image
-    x_offset = float(x_max) / 2.0 - cx
-    y_offset = float(y_max) / 2.0 - cy
-
-    print 'the x offset is ' + str(x_offset)
-    print 'the y offset is ' + str(y_offset)
+    x_offset = cx - float(x_max) / 2.0
+    y_offset = cy - float(y_max) / 2.0
 
     # Define a tolerance of how close you want cx and cy to be to the center of the image (in pixels)
-    tolerance = 3
+    tolerance = 30
 
-    # Do an initial rotation to calibrate gains
-    if abs(x_offset) > tolerance:
-        if x_offset < 0:
-            pan_angle = rotate_motor('pan', pan_angle - initial_rotation)
-        else:
-            pan_angle = rotate_motor('pan', pan_angle + initial_rotation)
-    if abs(y_offset) > tolerance:
-        if y_offset < 0:
-            tilt_angle = rotate_motor('tilt', tilt_angle + initial_rotation)
-        else:
-            tilt_angle = rotate_motor('tilt', tilt_angle - initial_rotation)
-    i = 1
-    img = capture_image(10,10,'centerimage' + str(i))
-    flame, cx, cy = find_centroid(img)
-    if not flame:
-        print 'Fire no longer detected after small angle change. Either the camera is too close to the fire, or the' \
-              ' fire has gone out'
-        exit()
+    i = 0
 
-    new_x_offset = float(x_max) / 2.0 - cx
-    new_y_offset = float(y_max) / 2.0 - cy
+    x_change = [0, 0, 0]
+    y_change = [0, 0, 0]
 
-    # Calculate gains. Gains refer to how far the camera moved versus how many pixels the centroid coordinates changed
-    # by.
-    x_change = new_x_offset - x_offset
-    y_change = new_y_offset - y_offset
-    if x_change == 0 or y_change == 0:
-        print('The initial turret rotation is too small. Please choose a larger initial rotation.')
-        exit()
-
-    x_gain = .1 * initial_rotation / abs(x_change)
-    y_gain = .1 * initial_rotation / abs(y_change)
-
-    x_offset = new_x_offset
-    y_offset = new_y_offset
-
-    # Repeat this process, updating the gains every iteration, until convergence
     while abs(x_offset) > tolerance or abs(y_offset) > tolerance:
+        print 'cx is ' + str(cx)
+        print 'cy is ' + str(cy)
         print 'the x offset is ' + str(x_offset)
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
             if x_offset < 0:
-                rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
+                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < Ix_limit > 4 else 0)))
             else:
-                rotate_motor('pan', pan_angle + x_offset * x_gain)
+                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < Ix_limit else 0)))
         if abs(y_offset) > tolerance:
             if y_offset < 0:
-                rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
+                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < Iy_limit else 0)))
             else:
-                rotate_motor('tilt', tilt_angle - y_offset * y_gain)
-        i = i + 1
-        img = capture_image(10,10,'centerimage' + str(i))
-        flame, cx, cy = find_centroid(img)
+                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < Iy_limit else 0)))
+        img = capture_image(1, 1, 'centerimage' + str(i))
+        flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
             print 'Flame lost'
             return 0
 
-        new_x_offset = float(x_max) / 2.0 - cx
-        new_y_offset = float(y_max) / 2.0 - cy
+        new_x_offset = cx - float(x_max) / 2.0
+        new_y_offset = cy - float(y_max) / 2.0
 
-        x_change = new_x_offset - x_offset
-        y_change = new_y_offset - y_offset
-
-        if x_change == 0 or y_change == 0:
-            print 'The gain is too small. Consider adding higher proportional or integral gains'
-            exit()
-
-        x_gain = .1 * abs(x_offset * x_gain) / abs(x_change)
-        y_gain = .1 * abs(y_offset * y_gain) / abs(y_change)
+        if i <= 2:
+            x_change[i] = (new_x_offset - x_offset)
+            y_change[i] = (new_y_offset - y_offset)
 
         x_offset = new_x_offset
         y_offset = new_y_offset
 
+        if abs(x_offset) < Ix_limit:
+            Ix_gain += Ix_coef * abs(x_offset)
+        if abs(y_offset) < Iy_limit:
+            Iy_gain += Iy_coef * abs(y_offset)
+
+        if i == 3:
+            ave_x_change = (abs(x_change[0]) + abs(x_change[1]) + abs(x_change[2]))/3
+            ave_y_change = (abs(y_change[0]) + abs(y_change[1]) + abs(y_change[2]))/3
+
+        if x_offset > 100 and y_offset > 100 and i == 3:
+            if ave_x_change < 10 or ave_y_change < 10:
+                print 'using far gain'
+                gain = far_gain
+            elif ave_x_change < 30 or ave_y_change < 30:
+                print 'using mid gain'
+                gain = mid_gain
+            else:
+                print 'using initial gain'
+                gain = initial_gain
+        i += 1
     return 1
 
 
@@ -244,3 +234,19 @@ def spray_water(duration=5):
     GPIO.output(27, 0)
 
     return
+
+def write_csv(R,To,Po,Tf,Pf,cxo,cyo,cxf,cyf,E=0):
+        filename = 'test_data.csv'
+        with open(filename,'a') as csvfile:
+                fieldnames = ['R', 'To', 'Po', 'Tf', 'Pf', 'cxo', 'cyo', 'cxf', 'cyf', 'E']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writerow({'R': R, \
+                                 'To': To, \
+                                 'Po': Po, \
+                                 'Tf': Tf, \
+                                 'Pf': Pf, \
+                                 'cxo': cxo, \
+                                 'cyo': cyo, \
+                                 'cxf': cxf, \
+                                 'cyf': cyf, \
+                                 'E': E})
