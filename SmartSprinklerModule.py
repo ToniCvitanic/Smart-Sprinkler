@@ -162,15 +162,15 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         print 'the x offset is ' + str(x_offset)
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
-            if x_offset < 0:
+            if (x_offset < 0 and tilt_angle < 0) or (x_offset > 0 and tilt_angle > 0):
                 rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
             else:
-                rotate_motor('pan', pan_angle + x_offset * x_gain)
+                rotate_motor('pan', pan_angle + abs(x_offset) * x_gain)
         if abs(y_offset) > tolerance:
-            if y_offset < 0:
+            if (y_offset < 0 and tilt_angle < 0) or (y_offset > 0 and tilt_angle > 0):
                 rotate_motor('tilt', tilt_angle - abs(y_offset) * y_gain)
             else:
-                rotate_motor('tilt', tilt_angle + y_offset * y_gain)
+                rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
         img = capture_image(1, 1, 'centerimage' + str(i))
         flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
