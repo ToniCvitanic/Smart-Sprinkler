@@ -4,6 +4,10 @@ import math
 # Initialize the position of the sprinkler to be at -90 degrees in pan, and -45 degrees in tilt
 pan_angle = SSM.rotate_motor('pan', -1.3)
 tilt_angle = SSM.rotate_motor('tilt', -1.5)
+left_check = 0
+right_check = 0
+bottom_check = 0
+top_check = 0
 
 i = 1
 while 1:
@@ -11,20 +15,28 @@ while 1:
     flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
     if flame_present:
         print 'Flame detected!'
-        if edge_crossing == 1:
+        for k in range(0, len(edge_crossing)):
+            if edge_crossing[k] == 1:
+                left_check = 1
+            elif edge_crossing[k] == 2:
+                right_check = 1
+            elif edge_crossing[k] == 3:
+                top_check = 1
+            elif edge_crossing[k] == 4:
+                bottom_check = 1
+        if left_check == 1:
             pan_angle = SSM.rotate_motor('pan', pan_angle - 3 * math.pi / 180)
-            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        elif edge_crossing == 2:
+        elif right_check == 1:
             pan_angle = SSM.rotate_motor('pan', pan_angle + 3 * math.pi / 180)
-            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        elif edge_crossing == 3:
+        if top_check == 1:
             tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
-            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        elif edge_crossing == 4:
+        elif bottom_check == 1:
             tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 3 * math.pi / 180)
-            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
-        else:
-            target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+        if left_check == 1 or right_check == 1 or bottom_check == 1 or top_check == 1:
+            flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
+
+        target_centered = SSM.center_target(pan_angle, tilt_angle, x_centroid, y_centroid)
+
         if target_centered:
             j = 1
             while flame_present:
@@ -46,6 +58,11 @@ while 1:
             print 'Failed to center target. Need to adjust the gains in the center_target function.'
             exit()
     else:
+        left_check = 0
+        right_check = 0
+        bottom_check = 0
+        top_check = 0
+
         # If the camera has panned across the whole 180 degrees, return to the beginning angle and start over
         if pan_angle > math.pi / 2 - .09:
             pan_angle = SSM.rotate_motor('pan', -1.3)
