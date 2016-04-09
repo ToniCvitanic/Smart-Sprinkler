@@ -29,10 +29,11 @@ while 1:
                 top_check = 1
             elif edge_crossing[k] == 4:
                 bottom_check = 1
+        y_offset = y_centroid - float(y_max) / 2.0
         if left_check == 1:
-            pan_angle = SSM.rotate_motor('pan', pan_angle - 3 * math.pi / 180)
+            pan_angle = SSM.rotate_motor('pan', pan_angle + (-3 if y_offset < 0 else 3) * math.pi / 180)
         elif right_check == 1:
-            pan_angle = SSM.rotate_motor('pan', pan_angle + 3 * math.pi / 180)
+            pan_angle = SSM.rotate_motor('pan', pan_angle + (3 if y_offset < 0 else -3) * math.pi / 180)
         if top_check == 1:
             tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
         elif bottom_check == 1:
