@@ -11,6 +11,9 @@ top_check = 0
 
 y_max = 480
 
+tilt_ind = 0
+tilt_scan_angles = [1.5, 1, .5]
+
 i = 1
 while 1:
     image = SSM.capture_image(1,1,'image' + str(i))
@@ -55,7 +58,7 @@ while 1:
                     else:
                         tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
                 else:
-                    tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
+                    tilt_angle = SSM.rotate_motor('tilt', -1.5)
                 j = j+1
         else:
             print 'Failed to center target. Need to adjust the gains in the center_target function.'
@@ -66,9 +69,18 @@ while 1:
         bottom_check = 0
         top_check = 0
 
-        # If the camera has panned across the whole 180 degrees, return to the beginning angle and start over
+        # If the camera has panned across the whole 180 degrees, return to the beginning angle and start over from the
+        # other side
         if pan_angle > math.pi / 2 - .09:
+            if tilt_angle < 0:
+                tilt_angle = SSM.rotate_motor('tilt', tilt_scan_angles[tilt_ind])
+            else:
+                tilt_angle = SSM.rotate_motor('tilt', -tilt_scan_angles[tilt_ind])
             pan_angle = SSM.rotate_motor('pan', -1.3)
+            if tilt_ind < 2:
+                tilt_ind += 1
+            else:
+                tilt_ind = 0
         else:
             pan_angle = SSM.rotate_motor('pan', pan_angle + 10 * math.pi / 180)
     i += 1
