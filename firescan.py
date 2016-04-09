@@ -58,7 +58,10 @@ while 1:
                     else:
                         tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
                 else:
-                    tilt_angle = SSM.rotate_motor('tilt', -1.5)
+                    if tilt_angle < 0:
+                        tilt_angle = SSM.rotate_motor('tilt', -tilt_scan_angles[tilt_ind])
+                    else:
+                        tilt_angle = SSM.rotate_motor('tilt', tilt_scan_angles[tilt_ind])
                 j = j+1
         else:
             print 'Failed to center target. Need to adjust the gains in the center_target function.'
