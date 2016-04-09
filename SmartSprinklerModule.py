@@ -183,22 +183,21 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         x_change = abs(new_x_offset - x_offset)
         y_change = abs(new_y_offset - y_offset)
 
-        x_percent_change = x_change / x_offset
-        y_percent_change = y_change / y_offset
+        x_percent_change = x_change / abs(x_offset)
+        y_percent_change = y_change / abs(y_offset)
 
-        if x_percent_change < .1:
-            x_gain *= 2
-        elif x_percent_change < .3:
-            x_gain *= 1.5
-        elif x_percent_change < .5:
+        print 'x_percent_change is ' + str(x_percent_change)
+        print 'y_percent_change is ' + str(y_percent_change)
+
+        if x_percent_change < .1 and abs(x_offset) > tolerance:
             x_gain *= 1.3
+        elif x_percent_change > .7 and abs(x_offset) > tolerance:
+            x_gain *= .8
 
-        if y_percent_change < .1:
-            y_gain *= 2
-        elif x_percent_change < .3:
-            y_gain *= 1.5
-        elif x_percent_change < .5:
+        if y_percent_change < .1 and abs(y_offset) > tolerance:
             y_gain *= 1.3
+        elif y_percent_change > .7 and abs(x_offset) > tolerance:
+            y_gain *= .8
 
         x_offset = new_x_offset
         y_offset = new_y_offset

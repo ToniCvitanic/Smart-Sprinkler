@@ -5,6 +5,8 @@ import math
 pan_angle = SSM.rotate_motor('pan', -1.3)
 tilt_angle = SSM.rotate_motor('tilt', -1.5)
 
+y_max = 480
+
 i = 1
 while 1:
     image = SSM.capture_image(1,1,'image' + str(i))
@@ -35,10 +37,11 @@ while 1:
                  #If initial spray did not extinguish the fire, spray upwards in increments until it has been
                  #extinguished
                 if flame_present:
+                    y_offset = y_centroid - float(y_max) / 2.0
                     if y_offset > 0:
-                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
-                    else:
                         tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 3 * math.pi / 180)
+                    else:
+                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
                 else:
                     tilt_angle = SSM.rotate_motor('tilt', -math.pi / 4)
                 j = j+1
