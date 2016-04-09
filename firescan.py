@@ -12,7 +12,7 @@ top_check = 0
 y_max = 480
 
 tilt_ind = 0
-tilt_scan_angles = [1.5, 1, .5]
+tilt_scan_angles = [1.5, 1.5, 1, 1, .5, .5]
 
 i = 1
 while 1:
@@ -80,7 +80,7 @@ while 1:
             else:
                 tilt_angle = SSM.rotate_motor('tilt', -tilt_scan_angles[tilt_ind])
             pan_angle = SSM.rotate_motor('pan', -1.3)
-            if tilt_ind < 2:
+            if tilt_ind < 5:
                 tilt_ind += 1
             else:
                 tilt_ind = 0

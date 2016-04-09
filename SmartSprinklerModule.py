@@ -167,7 +167,7 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
             else:
                 rotate_motor('pan', pan_angle + abs(x_offset) * x_gain)
         if abs(y_offset) > tolerance:
-            if (y_offset < 0 and tilt_angle < 0) or (y_offset > 0 and tilt_angle > 0):
+            if y_offset < 0:
                 rotate_motor('tilt', tilt_angle - abs(y_offset) * y_gain)
             else:
                 rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
@@ -192,12 +192,12 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         if x_percent_change < .1 and abs(x_offset) > tolerance:
             x_gain *= 1.3
         elif x_percent_change > .7 and abs(x_offset) > tolerance:
-            x_gain *= .8
+            x_gain *= .5
 
         if y_percent_change < .1 and abs(y_offset) > tolerance:
             y_gain *= 1.3
         elif y_percent_change > .7 and abs(x_offset) > tolerance:
-            y_gain *= .8
+            y_gain *= .5
 
         x_offset = new_x_offset
         y_offset = new_y_offset
