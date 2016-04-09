@@ -212,6 +212,13 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         x_offset = new_x_offset
         y_offset = new_y_offset
 
+        # If new gains are too small, take them up to a minimum gain determined
+        # through experimentation
+        if x_gain * abs(x_offset) < .03:
+            x_gain = .03 / abs(x_offset)
+        if y_gain * abs(x_offset) < .03:
+            y_gain = .03 / abs(y_offset)
+
         i += 1
     return 1
 
