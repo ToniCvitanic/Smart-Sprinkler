@@ -144,15 +144,8 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     x_max = 640
     y_max = 480
 
-    gain = initial_gain
-    mid_gain = .001
-    far_gain = .003
-    Ix_gain = 0
-    Iy_gain = 0
-    Ix_coef = .000002
-    Iy_coef = .000005
-    Ix_limit = 200
-    Iy_limit = 200
+    x_gain = initial_gain
+    y_gain = initial_gain
 
     # Calculate how far the x and y coordinates of the centroid are from the center of the image
     x_offset = cx - float(x_max) / 2.0
@@ -163,9 +156,6 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
 
     i = 0
 
-    x_change = [0, 0, 0]
-    y_change = [0, 0, 0]
-
     while abs(x_offset) > tolerance or abs(y_offset) > tolerance:
         print 'cx is ' + str(cx)
         print 'cy is ' + str(cy)
@@ -173,14 +163,14 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
             if x_offset < 0:
-                rotate_motor('pan', pan_angle - abs(x_offset) * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < Ix_limit > 4 else 0)))
+                rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
             else:
-                rotate_motor('pan', pan_angle + x_offset * ((initial_gain if i <= 2 else gain) + (Ix_gain if abs(x_offset) < Ix_limit else 0)))
+                rotate_motor('pan', pan_angle + x_offset * x_gain)
         if abs(y_offset) > tolerance:
             if y_offset < 0:
-                rotate_motor('tilt', tilt_angle - abs(y_offset) * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < Iy_limit else 0)))
+                rotate_motor('tilt', tilt_angle - abs(y_offset) * y_gain)
             else:
-                rotate_motor('tilt', tilt_angle + y_offset * ((initial_gain if i <= 2 else gain) + (Iy_gain if abs(y_offset) < Iy_limit else 0)))
+                rotate_motor('tilt', tilt_angle + y_offset * y_gain)
         img = capture_image(1, 1, 'centerimage' + str(i))
         flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
@@ -190,32 +180,29 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         new_x_offset = cx - float(x_max) / 2.0
         new_y_offset = cy - float(y_max) / 2.0
 
-        if i <= 2:
-            x_change[i] = (new_x_offset - x_offset)
-            y_change[i] = (new_y_offset - y_offset)
+        x_change = abs(new_x_offset - x_offset)
+        y_change = abs(new_y_offset - y_offset)
+
+        x_percent_change = x_change / x_offset
+        y_percent_change = y_change / y_offset
+
+        if x_percent_change < .1:
+            x_gain *= 2
+        elif x_percent_change < .3:
+            x_gain *= 1.5
+        elif x_percent_change < .5:
+            x_gain *= 1.3
+
+        if y_percent_change < .1:
+            y_gain *= 2
+        elif x_percent_change < .3:
+            y_gain *= 1.5
+        elif x_percent_change < .5:
+            y_gain *= 1.3
 
         x_offset = new_x_offset
         y_offset = new_y_offset
 
-        if abs(x_offset) < Ix_limit:
-            Ix_gain += Ix_coef * abs(x_offset)
-        if abs(y_offset) < Iy_limit:
-            Iy_gain += Iy_coef * abs(y_offset)
-
-        if i == 3:
-            ave_x_change = (abs(x_change[0]) + abs(x_change[1]) + abs(x_change[2]))/3
-            ave_y_change = (abs(y_change[0]) + abs(y_change[1]) + abs(y_change[2]))/3
-
-        if x_offset > 100 and y_offset > 100 and i == 3:
-            if ave_x_change < 10 or ave_y_change < 10:
-                print 'using far gain'
-                gain = far_gain
-            elif ave_x_change < 30 or ave_y_change < 30:
-                print 'using mid gain'
-                gain = mid_gain
-            else:
-                print 'using initial gain'
-                gain = initial_gain
         i += 1
     return 1
 
