@@ -20,7 +20,7 @@ while 1:
     flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
     if flame_present:
         print 'Flame detected!'
-        for k in range(0, len(edge_crossing) - 1):
+        for k in range(0, len(edge_crossing)):
             if edge_crossing[k] == 1:
                 left_check = 1
             elif edge_crossing[k] == 2:
