@@ -30,7 +30,7 @@ R = input("What is the range (ft): ")
 
 # Vary Pan and Tilt for +/- 10,5,3 degrees
 
-changes = [20, -20, 10, -10, 5, -5, 3, -3]
+changes = [10, -10, 5, -5, 3, -3]
 for change in changes:
         if abs(To+change)<90:
                 F = 0; cxo = 0; cyo = 0; E=0; cx = 0; cy = 0
