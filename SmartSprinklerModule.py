@@ -13,7 +13,7 @@ import os
 # Capture an Image Directly from the Webcam:
 
 
-def capture_image(ramp_frames=10, average_frames=10, file_name='null'):
+def capture_image(ramp_frames=1, average_frames=1, file_name='null'):
     # Function to capture an image via webcam. Requires cv2, numpy, and os.
     # Optional Input Arguments:
     #       - ramp_frames is the number of frames to wait for the camera to calibrate
@@ -112,6 +112,7 @@ def rotate_motor(direction, angle):
         angle = math.pi / 2
 
     if direction is 'pan':
+        # The angles here in radians were experimentally determined for the motors
         if angle <= 0:
             duty_cycle = (math.pi / 2 - abs(angle)) * 4.55 / (math.pi / 2) + 3.4
         else:
@@ -124,6 +125,7 @@ def rotate_motor(direction, angle):
             duty_cycle = angle * (4.55 / (math.pi / 2)) + 7.95
         print 'the tilt duty cycle is ' + str(duty_cycle) + '%'
 
+    # The first number indicates the gpio port, the second the frequency, and the third the duty cycle
     if direction == 'pan':
         pi.hardware_PWM(13, 50, duty_cycle * 10000)
     else:
@@ -136,7 +138,7 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     # This function commands the motors to adjust the camera until the centroid of the fire is brought to the center of
     # the image
     # pan_angle and tilt_angle indicate the current pan and tilt angles of the camera
-    # initial_rotation indicates the angle by which the camera will rotate to calibrate its gains
+    # the default initial_gain was determined through experimentation
 
     # The function returns 1 if successful, and 0 if unsuccessful
 
@@ -144,6 +146,7 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     x_max = 640
     y_max = 480
 
+    # Define initial gains
     x_gain = initial_gain
     y_gain = initial_gain
 
@@ -155,23 +158,26 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     tolerance = 30
 
     i = 0
-
+    # Repeat until both x and y are within the desired tolerance
     while abs(x_offset) > tolerance or abs(y_offset) > tolerance:
-        print 'cx is ' + str(cx)
-        print 'cy is ' + str(cy)
+        #print 'cx is ' + str(cx)
+        #print 'cy is ' + str(cy)
         print 'the x offset is ' + str(x_offset)
         print 'the y offset is ' + str(y_offset)
         if abs(x_offset) > tolerance:
+            # The if statements here check on the position of the sprinkler (some things are inverted depending on if
+            # the tilt is below or above 0
             if (x_offset < 0 and tilt_angle < 0) or (x_offset > 0 and tilt_angle > 0):
                 rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
             else:
                 rotate_motor('pan', pan_angle + abs(x_offset) * x_gain)
         if abs(y_offset) > tolerance:
-            if (y_offset < 0 and tilt_angle < 0) or (y_offset > 0 and tilt_angle > 0):
+            if y_offset < 0:
                 rotate_motor('tilt', tilt_angle - abs(y_offset) * y_gain)
             else:
                 rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
-        img = capture_image(1, 1, 'centerimage' + str(i))
+        #img = capture_image(1, 1, 'centerimage' + str(i))
+        img = capture_image()
         flame, cx, cy, edge_crossing = find_centroid(img)
         if not flame:
             print 'Flame lost'
@@ -180,27 +186,38 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         new_x_offset = cx - float(x_max) / 2.0
         new_y_offset = cy - float(y_max) / 2.0
 
+        # Calculate how much of an effect the last adjustment had
         x_change = abs(new_x_offset - x_offset)
         y_change = abs(new_y_offset - y_offset)
-
         x_percent_change = x_change / abs(x_offset)
         y_percent_change = y_change / abs(y_offset)
 
-        print 'x_percent_change is ' + str(x_percent_change)
-        print 'y_percent_change is ' + str(y_percent_change)
+        #print 'x_percent_change is ' + str(x_percent_change)
+        #print 'y_percent_change is ' + str(y_percent_change)
 
+        # These gains chosen by experimentation.
+
+        # This increases gain if progress is too slow
         if x_percent_change < .1 and abs(x_offset) > tolerance:
             x_gain *= 1.3
+        # This decreases gain if process is too fast
         elif x_percent_change > .7 and abs(x_offset) > tolerance:
-            x_gain *= .8
+            x_gain *= .5
 
         if y_percent_change < .1 and abs(y_offset) > tolerance:
             y_gain *= 1.3
         elif y_percent_change > .7 and abs(x_offset) > tolerance:
-            y_gain *= .8
+            y_gain *= .5
 
         x_offset = new_x_offset
         y_offset = new_y_offset
+
+        # If new gains are too small, take them up to a minimum gain determined
+        # through experimentation
+        if x_gain * abs(x_offset) < .03:
+            x_gain = .03 / abs(x_offset)
+        if y_gain * abs(x_offset) < .03:
+            y_gain = .03 / abs(y_offset)
 
         i += 1
     return 1
