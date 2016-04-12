@@ -1,8 +1,14 @@
 import SmartSprinklerModule as SSM
 import math
+import os
+import RPi.GPIO as GPIO
 
 # This script is the main script to run the Smart Sprinkler. It continuously scans for, targets, and squirts water at
 # fires as long as the device is turned on
+
+# Setup the shutdown pin switch to be high with the internal pullup resistor
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Initialize the position of the sprinkler position
 pan_angle = SSM.rotate_motor('pan', -1.3)
@@ -106,3 +112,11 @@ while 1:
         else:
             pan_angle = SSM.rotate_motor('pan', pan_angle + 10 * math.pi / 180)
     i += 1
+
+try:
+    GPIO.wait_for_edge(25, GPIO.FALLING)
+    print 'you pressed the shutdown button, if you actually want to shut down the pi, uncomment the line in firescan'
+    #os.system("sudo shutdown -h now")
+except KeyboardInterrupt:
+    print 'Ending firescan'
+    SSM.killmotors()
