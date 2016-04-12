@@ -253,3 +253,11 @@ def write_csv(R,To,Po,Tf,Pf,cxo,cyo,cxf,cyf,E=0):
                                  'cxf': cxf, \
                                  'cyf': cyf, \
                                  'E': E})
+
+def killmotors():
+    pi = pigpio.pi()
+    pi.hardware_PWM(13, 50, 0)
+    pi.hardware_PWM(18, 50, 0)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.OUT)
+    GPIO.output(27, 0)
