@@ -67,19 +67,13 @@ while 1:
             # Spray water until the flame is no longer present
             while flame_present:
                 print 'Spraying water'
-                SSM.spray_water()
+                SSM.spray_water(tilt_angle)
                 image = SSM.capture_image()
                 #image = SSM.capture_image(1,1,'flameimage' + str(j))
                 flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
                 # If initial spray did not extinguish the fire, spray at slightly different tilts until it is
                 # extinguished
-                if flame_present:
-                    y_offset = y_centroid - float(y_max) / 2.0
-                    if y_offset > 0:
-                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 3 * math.pi / 180)
-                    else:
-                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
-                else:
+                if not flame_present:
                     if tilt_angle < 0:
                         tilt_angle = SSM.rotate_motor('tilt', -tilt_scan_angles[tilt_ind])
                     else:
