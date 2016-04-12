@@ -223,19 +223,17 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     return 1
 
 
-def spray_water(duration=5):
+def spray_water(tilt_angle):
     # This function sprays the water fun at full power for a specified amount of time in seconds
-
-    if duration < 0:
-        print 'Cannot spray water for a negative amount time'
-        exit()
-
+    initial_tilt_angle = tilt_angle
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(27, GPIO.OUT)
     GPIO.output(27, 1)
-    time.sleep(duration)
+    for x in range(-.17,.17,.02):
+        tilt_angle = rotate_motor('tilt', tilt_angle + x)
+        time.sleep(.1)
+    rotate_motor('tilt', initial_tilt_angle)
     GPIO.output(27, 0)
-
     return
 
 def write_csv(R,To,Po,Tf,Pf,cxo,cyo,cxf,cyf,E=0):

@@ -1,14 +1,9 @@
 import SmartSprinklerModule as SSM
 import math
-import os
 import RPi.GPIO as GPIO
 
 # This script is the main script to run the Smart Sprinkler. It continuously scans for, targets, and squirts water at
 # fires as long as the device is turned on
-
-# Setup the shutdown pin switch to be high with the internal pullup resistor
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Initialize the position of the sprinkler position
 pan_angle = SSM.rotate_motor('pan', -1.3)
@@ -67,19 +62,13 @@ while 1:
             # Spray water until the flame is no longer present
             while flame_present:
                 print 'Spraying water'
-                SSM.spray_water()
+                SSM.spray_water(tilt_angle)
                 image = SSM.capture_image()
                 #image = SSM.capture_image(1,1,'flameimage' + str(j))
                 flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)
                 # If initial spray did not extinguish the fire, spray at slightly different tilts until it is
                 # extinguished
-                if flame_present:
-                    y_offset = y_centroid - float(y_max) / 2.0
-                    if y_offset > 0:
-                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle + 3 * math.pi / 180)
-                    else:
-                        tilt_angle = SSM.rotate_motor('tilt', tilt_angle - 3 * math.pi / 180)
-                else:
+                if not flame_present:
                     if tilt_angle < 0:
                         tilt_angle = SSM.rotate_motor('tilt', -tilt_scan_angles[tilt_ind])
                     else:
@@ -112,11 +101,3 @@ while 1:
         else:
             pan_angle = SSM.rotate_motor('pan', pan_angle + 10 * math.pi / 180)
     i += 1
-
-try:
-    GPIO.wait_for_edge(25, GPIO.FALLING)
-    print 'you pressed the shutdown button, if you actually want to shut down the pi, uncomment the line in firescan'
-    #os.system("sudo shutdown -h now")
-except KeyboardInterrupt:
-    print 'Ending firescan'
-    SSM.killmotors()
