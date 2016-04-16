@@ -225,13 +225,13 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
 
 def spray_water(tilt_angle):
     # This function sprays the water fun at full power for a specified amount of time in seconds
-
     initial_tilt_angle = tilt_angle
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(27, GPIO.OUT)
     GPIO.output(27, 1)
-    for x in range(-.17,.17,.02):
-        tilt_angle = rotate_motor('tilt', tilt_angle + x)
+    for y in range(0,9):
+        x = .02*y
+        tilt_angle = rotate_motor('tilt', tilt_angle + (x if tilt_angle > 0 else -x))
         time.sleep(.1)
     rotate_motor('tilt', initial_tilt_angle)
     GPIO.output(27, 0)
@@ -261,6 +261,6 @@ def killmotors():
     GPIO.setup(27, GPIO.OUT)
     GPIO.output(27, 0)
 
-def shutdown():
-    #os.system("sudo shutdown -h now")
-    print 'you pressed the shutdown button'
+def shutdown(channel):
+    os.system("sudo shutdown -h now")
+    #print 'you pressed the shutdown button'
