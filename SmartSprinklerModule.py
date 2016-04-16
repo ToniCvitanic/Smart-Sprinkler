@@ -260,3 +260,7 @@ def killmotors():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(27, GPIO.OUT)
     GPIO.output(27, 0)
+
+def shutdown():
+    #os.system("sudo shutdown -h now")
+    print 'you pressed the shutdown button'

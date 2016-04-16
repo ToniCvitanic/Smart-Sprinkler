@@ -8,7 +8,8 @@ import RPi.GPIO as GPIO
 
 # Setup the shutdown pin switch to be high with the internal pullup resistor
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.add_event_detect(19, GPIO.FALLING, callback = SSM.shutdown, bouncetime = 2000)
 
 # Initialize the position of the sprinkler position
 pan_angle = SSM.rotate_motor('pan', -1.3)
@@ -107,10 +108,4 @@ while 1:
             pan_angle = SSM.rotate_motor('pan', pan_angle + 10 * math.pi / 180)
     i += 1
 
-try:
-    GPIO.wait_for_edge(25, GPIO.FALLING)
-    print 'you pressed the shutdown button, if you actually want to shut down the pi, uncomment the line in firescan'
-    #os.system("sudo shutdown -h now")
-except KeyboardInterrupt:
-    print 'Ending firescan'
-    SSM.killmotors()
+
