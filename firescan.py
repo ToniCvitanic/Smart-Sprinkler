@@ -72,6 +72,7 @@ while 1:
 				while flame_present:
 					print 'Spraying water'
 					SSM.spray_water(tilt_angle)
+					tilt_angle = SSM.rotate_motor('tilt', tilt_angle)
 					image = SSM.capture_image()
 					#image = SSM.capture_image(1,1,'flameimage' + str(j))
 					flame_present, x_centroid, y_centroid, edge_crossing = SSM.find_centroid(image)

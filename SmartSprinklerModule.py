@@ -229,9 +229,9 @@ def spray_water(tilt_angle):
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(27, GPIO.OUT)
     GPIO.output(27, 1)
-    for y in range(0,9):
+    for y in range(-3,9):
         x = .02*y
-        tilt_angle = rotate_motor('tilt', tilt_angle + (x if tilt_angle > 0 else -x))
+        tilt_angle = rotate_motor('tilt', tilt_angle + (-x if tilt_angle > 0 else x))
         time.sleep(.1)
     tilt_angle = rotate_motor('tilt', initial_tilt_angle)
     GPIO.output(27, 0)
