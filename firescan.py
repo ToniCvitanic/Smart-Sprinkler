@@ -2,6 +2,7 @@ import SmartSprinklerModule as SSM
 import math
 import os
 import RPi.GPIO as GPIO
+import sys
 
 # This script is the main script to run the Smart Sprinkler. It continuously scans for, targets, and squirts water at
 # fires as long as the device is turned on
@@ -111,9 +112,14 @@ while 1:
 				pan_angle = SSM.rotate_motor('pan', pan_angle + 10 * math.pi / 180)
 		i += 1
 	except:
-		print "Unexpected error:", sys.exc_info()[0]
-		with open("Error_Log.txt", "w") as text_file:
-			text_file.write("Error: {0}".format(sys.exc_info()[0]))
+                sysinfo = sys.exc_info()
+		print "Unexpected error:",sysinfo[1]
+		with open("Error_Log.txt", "a") as text_file:
+			text_file.write("\n Error: {0}".format(sys.exc_info()[0]))
+			text_file.write("\n Error: {0}".format(sys.exc_info()[1]))
+			text_file.write("\n Error: {0}".format(sys.exc_info()[2]))
+
+
 
 		
 
