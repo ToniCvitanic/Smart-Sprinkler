@@ -141,7 +141,7 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     # the default initial_gain was determined through experimentation
 
     # The function returns 1 if successful, and 0 if unsuccessful
-
+    
     # Define the image size
     x_max = 640
     y_max = 480
@@ -199,13 +199,13 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
 
         # This increases gain if progress is too slow
         if x_percent_change < .1 and abs(x_offset) > tolerance:
-            x_gain *= 1.3
+            x_gain += initial_gain
         # This decreases gain if process is too fast
         elif x_percent_change > .7 and abs(x_offset) > tolerance:
             x_gain *= .5
 
         if y_percent_change < .1 and abs(y_offset) > tolerance:
-            y_gain *= 1.3
+            y_gain += initial_gain
         elif y_percent_change > .7 and abs(x_offset) > tolerance:
             y_gain *= .5
 
