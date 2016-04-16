@@ -3,6 +3,7 @@ import math
 import os
 import RPi.GPIO as GPIO
 import sys
+import time
 
 # This script is the main script to run the Smart Sprinkler. It continuously scans for, targets, and squirts water at
 # fires as long as the device is turned on
@@ -118,7 +119,9 @@ while 1:
 			text_file.write("\n Error: {0}".format(sys.exc_info()[0]))
 			text_file.write("\n Error: {0}".format(sys.exc_info()[1]))
 			text_file.write("\n Error: {0}".format(sys.exc_info()[2]))
-
+		break
+while 1:
+        time.sleep(1)
 
 
 		
