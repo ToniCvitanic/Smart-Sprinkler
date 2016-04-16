@@ -168,14 +168,14 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
             # The if statements here check on the position of the sprinkler (some things are inverted depending on if
             # the tilt is below or above 0
             if (x_offset < 0 and tilt_angle < 0) or (x_offset > 0 and tilt_angle > 0):
-                rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
+                pan_angle = rotate_motor('pan', pan_angle - abs(x_offset) * x_gain)
             else:
-                rotate_motor('pan', pan_angle + abs(x_offset) * x_gain)
+                pan_angle = rotate_motor('pan', pan_angle + abs(x_offset) * x_gain)
         if abs(y_offset) > tolerance:
             if y_offset < 0:
-                rotate_motor('tilt', tilt_angle - abs(y_offset) * y_gain)
+                tilt_angle = rotate_motor('tilt', tilt_angle - abs(y_offset) * y_gain)
             else:
-                rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
+                tilt_angle = rotate_motor('tilt', tilt_angle + abs(y_offset) * y_gain)
         #img = capture_image(1, 1, 'centerimage' + str(i))
         img = capture_image()
         flame, cx, cy, edge_crossing = find_centroid(img)
@@ -199,13 +199,13 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
 
         # This increases gain if progress is too slow
         if x_percent_change < .1 and abs(x_offset) > tolerance:
-            x_gain += initial_gain
+            x_gain *= 1.3
         # This decreases gain if process is too fast
         elif x_percent_change > .7 and abs(x_offset) > tolerance:
             x_gain *= .5
 
         if y_percent_change < .1 and abs(y_offset) > tolerance:
-            y_gain += initial_gain
+            y_gain *= 1.3
         elif y_percent_change > .7 and abs(x_offset) > tolerance:
             y_gain *= .5
 
@@ -233,7 +233,7 @@ def spray_water(tilt_angle):
         x = .02*y
         tilt_angle = rotate_motor('tilt', tilt_angle + (x if tilt_angle > 0 else -x))
         time.sleep(.1)
-    rotate_motor('tilt', initial_tilt_angle)
+    tilt_angle = rotate_motor('tilt', initial_tilt_angle)
     GPIO.output(27, 0)
     return
 
