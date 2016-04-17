@@ -223,19 +223,18 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     return 1
 
 
-def spray_water(duration=5):
+def spray_water(tilt_angle):
     # This function sprays the water fun at full power for a specified amount of time in seconds
-
-    if duration < 0:
-        print 'Cannot spray water for a negative amount time'
-        exit()
-
+    initial_tilt_angle = tilt_angle
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(27, GPIO.OUT)
     GPIO.output(27, 1)
-    time.sleep(duration)
+    for y in range(0,9):
+        x = .02*y
+        tilt_angle = rotate_motor('tilt', tilt_angle + (x if tilt_angle > 0 else -x))
+        time.sleep(.1)
+    rotate_motor('tilt', initial_tilt_angle)
     GPIO.output(27, 0)
-
     return
 
 def write_csv(R,To,Po,Tf,Pf,cxo,cyo,cxf,cyf,E=0):
@@ -253,3 +252,15 @@ def write_csv(R,To,Po,Tf,Pf,cxo,cyo,cxf,cyf,E=0):
                                  'cxf': cxf, \
                                  'cyf': cyf, \
                                  'E': E})
+
+def killmotors():
+    pi = pigpio.pi()
+    pi.hardware_PWM(13, 50, 0)
+    pi.hardware_PWM(18, 50, 0)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(27, GPIO.OUT)
+    GPIO.output(27, 0)
+
+def shutdown(channel):
+    os.system("sudo shutdown -h now")
+    #print 'you pressed the shutdown button'
