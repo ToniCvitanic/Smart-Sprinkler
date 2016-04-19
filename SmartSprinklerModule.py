@@ -57,7 +57,7 @@ def capture_image(ramp_frames=1, average_frames=1, file_name='null'):
 def find_centroid(img, level=240):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img, level, 255, 0)
-    if thresh.max() < 255:
+    if thresh.max() < 255 or int(thresh.sum) == 0:
         FLAME_DETECTED = 0
         cx = []
         cy = []
@@ -127,9 +127,9 @@ def rotate_motor(direction, angle):
 
     # The first number indicates the gpio port, the second the frequency, and the third the duty cycle
     if direction == 'pan':
-        pi.hardware_PWM(13, 50, duty_cycle * 10000)
+        pi.hardware_PWM(13, 50, int(duty_cycle * 10000))
     else:
-        pi.hardware_PWM(18, 50, duty_cycle * 10000)
+        pi.hardware_PWM(18, 50, int(duty_cycle * 10000))
 
     return angle
 
@@ -189,8 +189,10 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
         # Calculate how much of an effect the last adjustment had
         x_change = abs(new_x_offset - x_offset)
         y_change = abs(new_y_offset - y_offset)
-        x_percent_change = x_change / abs(x_offset)
-        y_percent_change = y_change / abs(y_offset)
+        if x_offset not 0:
+            x_percent_change = x_change / abs(x_offset)
+        if y_offset not 0:
+            y_percent_change = y_change / abs(y_offset)
 
         #print 'x_percent_change is ' + str(x_percent_change)
         #print 'y_percent_change is ' + str(y_percent_change)
@@ -214,9 +216,9 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
 
         # If new gains are too small, take them up to a minimum gain determined
         # through experimentation
-        if x_gain * abs(x_offset) < .03:
+        if x_gain * abs(x_offset) < .03 and x_offset not 0:
             x_gain = .03 / abs(x_offset)
-        if y_gain * abs(x_offset) < .03:
+        if y_gain * abs(x_offset) < .03 and y_offset not 0:
             y_gain = .03 / abs(y_offset)
 
         i += 1
