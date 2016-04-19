@@ -155,7 +155,7 @@ def center_target(pan_angle, tilt_angle, cx, cy, initial_gain=.0005):
     y_offset = cy - float(y_max) / 2.0
 
     # Define a tolerance of how close you want cx and cy to be to the center of the image (in pixels)
-    tolerance = 15
+    tolerance = 30
 
     i = 0
     # Repeat until both x and y are within the desired tolerance
@@ -231,7 +231,7 @@ def spray_water(tilt_angle):
     GPIO.output(27, 1)
     for y in range(-3,9):
         x = .01*y
-        tilt_angle = rotate_motor('tilt', tilt_angle + (-x if tilt_angle > 0 else x))
+        tilt_angle = rotate_motor('tilt', tilt_angle + x)
         time.sleep(.5)
     tilt_angle = rotate_motor('tilt', initial_tilt_angle)
     GPIO.output(27, 0)
